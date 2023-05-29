@@ -1,0 +1,49 @@
+#include <stdio.h>
+#include <pthread.h>
+#include <semaphore.h>
+
+#define N_FILOSOFOS 5
+
+sem_t tenedores[N_FILOSOFOS]; // Arreglo de semáforos para representar los tenedores
+
+void *filosofo(void *arg) {
+    int id = *(int *)arg; // Id del filósofo
+    int tenedor_izq = id; // Id del tenedor izquierdo
+    int tenedor_der = (id + 1) % N_FILOSOFOS; // Id del tenedor derecho
+
+    while (1) {
+        // Esperar turno para adquirir los tenedores
+        sem_wait(&tenedores[tenedor_izq]);
+        sem_wait(&tenedores[tenedor_der]);
+
+        // Filósofo adquiere los tenedores y come
+
+        // Liberar los tenedores
+        sem_post(&tenedores[tenedor_der]);
+        sem_post(&tenedores[tenedor_izq]);
+
+        // Filósofo piensa
+    }
+
+    pthread_exit(NULL);
+}
+
+int main() {
+    pthread_t filosofos[N_FILOSOFOS];
+    int ids[N_FILOSOFOS];
+
+    // Inicializar los tenedores (semáforos)
+    for (int i = 0; i < N_FILOSOFOS; i++) {
+        sem_init(&tenedores[i], 0, 1); // Inicializar los semáforos con un recurso disponible
+    }
+
+    // Crear filósofos (hilos)
+    for (int i = 0; i < N_FILOSOFOS; i++) {
+        ids[i] = i;
+        pthread_create(&filosofos[i], NULL, filosofo, &ids[i]);
+    }
+
+    // Olvidaste destruir los semaforos, ¿Recuerdas que estan guardados en memoria? xD
+
+    return 0;
+}
